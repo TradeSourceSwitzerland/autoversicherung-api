@@ -3,6 +3,12 @@ FROM mcr.microsoft.com/playwright:focal
 
 WORKDIR /app
 
+# Installiere pip für Python3
+USER root
+RUN apt-get update && \
+    apt-get install -y python3-pip && \
+    rm -rf /var/lib/apt/lists/*
+
 # Installiere nur deine Python‑Dependencies
 COPY requirements.txt .
 RUN python3 -m pip install --no-cache-dir -r requirements.txt
