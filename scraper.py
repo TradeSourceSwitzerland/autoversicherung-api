@@ -15,7 +15,7 @@ def scrape_praemie(profile, datum, fahrzeug, leasing):
         # Datum eingeben
         page.locator('[data-test="DateInputFormik"]').fill(datum)
 
-        # Fahrzeug eingeben und Auto auswählen
+        # Fahrzeug eingeben und Auswahl treffen
         text_input = page.locator('[data-test="TextInputFormik"]').first
         text_input.fill(fahrzeug)
         page.get_by_role("listitem").filter(has_text=fahrzeug).first.click()
