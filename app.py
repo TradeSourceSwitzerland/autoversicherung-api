@@ -3,13 +3,14 @@ from flask_cors import CORS
 from scraper import scrape_praemie
 
 app = Flask(__name__)
-CORS(app)
+CORS(app)  # Erlaubt Cross-Origin Requests von deinem Webflow-Frontend
 
-# Health‑Check für Render
+# Health‑Check für Render: liefert 200 OK für GET und HEAD auf "/"
 @app.route('/', methods=['GET', 'HEAD'])
 def health_check():
     return 'OK', 200
 
+# Dein eigentlicher API‑Endpoint
 @app.route('/run-bot', methods=['POST'])
 def run_bot():
     data = request.get_json()
@@ -25,4 +26,5 @@ def run_bot():
         return jsonify({ 'status': 'error', 'message': 'Preis nicht gefunden' }), 500
 
 if __name__ == '__main__':
+    # Bindet an alle Interfaces auf Port 5000
     app.run(host='0.0.0.0', port=5000)
