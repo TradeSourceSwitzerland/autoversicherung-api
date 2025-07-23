@@ -1,9 +1,14 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS             # neu
+from flask_cors import CORS
 from scraper import scrape_praemie
 
 app = Flask(__name__)
-CORS(app)                                # hier aktivieren
+CORS(app)
+
+# Health‑Check für Render
+@app.route('/', methods=['GET', 'HEAD'])
+def health_check():
+    return 'OK', 200
 
 @app.route('/run-bot', methods=['POST'])
 def run_bot():
