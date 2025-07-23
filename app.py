@@ -1,7 +1,9 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS             # neu
 from scraper import scrape_praemie
 
 app = Flask(__name__)
+CORS(app)                                # hier aktivieren
 
 @app.route('/run-bot', methods=['POST'])
 def run_bot():
