@@ -6,7 +6,7 @@ def scrape_praemie(profile, datum, fahrzeug, leasing):
         # Headless + No‑Sandbox für Container‑Umgebungen
         browser = p.chromium.launch(headless=True, args=["--no-sandbox"])
         page = browser.new_page()
-        page.goto("https://www.comparis.ch/autoversicherung/default#content-2")
+        page.goto("https://www.comparis.ch/autoversicherung/default#content-3")
 
         # 1) Cookie‑Banner wegklicken
         try:
