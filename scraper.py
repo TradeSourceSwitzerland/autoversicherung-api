@@ -8,8 +8,8 @@ def scrape_praemie(profile, datum, fahrzeug, leasing):
 
         # 1) Versuch, den Cookie‑Banner wegzuklicken, falls vorhanden
         try:
-            btn = page.get_by_role("button", name="I Accept", timeout=5000)
-            btn.click()
+            # timeout jetzt in click(), nicht in get_by_role()
+            page.get_by_role("button", name="I Accept").click(timeout=5000)
         except TimeoutError:
             pass  # Banner nicht gefunden
 
