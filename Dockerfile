@@ -1,4 +1,4 @@
-# Verwende das offizielle Playwright‑Image mit bereits installierten Browsern
+# Offizielles Playwright‑Image mit bereits installierten Browsern
 FROM mcr.microsoft.com/playwright:focal
 
 WORKDIR /app
