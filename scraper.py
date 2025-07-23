@@ -11,8 +11,7 @@ def scrape_praemie(profile, datum, fahrzeug, leasing):
             btn = page.get_by_role("button", name="I Accept", timeout=5000)
             btn.click()
         except TimeoutError:
-            # Banner nicht gefunden – weiter ohne Klick
-            pass
+            pass  # Banner nicht gefunden
 
         # 2) Profil wählen
         page.get_by_role("button", name=profile).click()
@@ -23,16 +22,17 @@ def scrape_praemie(profile, datum, fahrzeug, leasing):
         # 4) Fahrzeug eingeben und Auswahl treffen
         text_input = page.locator('[data-test="TextInputFormik"]').first
         text_input.fill(fahrzeug)
-        # etwas großzügiger suchen: ein Teil-Text matchen
-        page.get_by_role("listitem").filter(has_text=fahrzeug.split(' ')[0]).first.click()
+        page.get_by_role("listitem") \
+            .filter(has_text=fahrzeug.split(' ')[0]) \
+            .first \
+            .click()
 
         # 5) Leasing auswählen (falls gewünscht)
         if leasing:
             try:
                 page.get_by_text("Leasing").click()
             except TimeoutError:
-                # Falls das Label anders heißt, ignoriere es
-                pass
+                pass  # Checkbox nicht gefunden
 
         # 6) Prämie berechnen
         page.get_by_role("button", name="Prämien berechnen", exact=True).click()
@@ -42,6 +42,12 @@ def scrape_praemie(profile, datum, fahrzeug, leasing):
             price = page.text_content("text=/CHF/", timeout=10000)
         except TimeoutError:
             price = None
+
+        # Logging für Render-Logs
+        if price:
+            print(f"Found price: {price}")
+        else:
+            print("⚠️ Preis nicht gefunden")
 
         browser.close()
     return price
