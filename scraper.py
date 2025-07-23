@@ -6,14 +6,19 @@ def scrape_praemie(profile, datum, fahrzeug, leasing):
         page = browser.new_page()
         page.goto("https://www.comparis.ch/autoversicherung/default#content-2")
 
-        # 1) Cookie‑Banner wegklicken
+        # 1) Cookie‑Banner wegklicken (5 s Timeout)
         try:
             page.get_by_role("button", name="I Accept").click(timeout=5000)
         except TimeoutError:
             pass
 
-        # 2) Profil wählen
-        page.get_by_role("button", name=profile).click()
+        # 2) Profil wählen (5 s Timeout)
+        try:
+            page.get_by_role("button", name=profile).click(timeout=5000)
+        except TimeoutError:
+            print(f"⚠️ Profil‑Button '{profile}' nicht gefunden")
+            browser.close()
+            return None
 
         # 3) Datum eingeben
         page.locator('[data-test="DateInputFormik"]').fill(datum)
@@ -24,9 +29,9 @@ def scrape_praemie(profile, datum, fahrzeug, leasing):
         page.get_by_role("listitem") \
             .filter(has_text=fahrzeug.split(' ')[0]) \
             .first \
-            .click()
+            .click(timeout=5000)
 
-        # 5) Leasing anklicken (falls gewünscht)
+        # 5) Leasing anklicken (falls gewünscht, 5 s Timeout)
         if leasing:
             try:
                 leasing_locator = page.locator('[data-test="RadioCheckbox"]') \
@@ -34,18 +39,18 @@ def scrape_praemie(profile, datum, fahrzeug, leasing):
                                       .first
                 leasing_locator.click(timeout=5000)
             except TimeoutError:
-                pass  # Checkbox nicht gefunden
+                pass
 
         # 6) Prämie berechnen
-        page.get_by_role("button", name="Prämien berechnen", exact=True).click()
+        page.get_by_role("button", name="Prämien berechnen", exact=True).click(timeout=5000)
 
-        # 7) Ergebnis auslesen
+        # 7) Ergebnis auslesen (10 s Timeout)
         try:
             price = page.text_content("text=/CHF/", timeout=10000)
         except TimeoutError:
             price = None
 
-        # Logging für Render-Logs
+        # Logging
         if price:
             print(f"Found price: {price}")
         else:
