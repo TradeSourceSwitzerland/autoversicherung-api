@@ -6,12 +6,11 @@ def scrape_praemie(profile, datum, fahrzeug, leasing):
         page = browser.new_page()
         page.goto("https://www.comparis.ch/autoversicherung/default#content-2")
 
-        # 1) Versuch, den Cookie‑Banner wegzuklicken, falls vorhanden
+        # 1) Cookie‑Banner wegklicken
         try:
-            # timeout jetzt in click(), nicht in get_by_role()
             page.get_by_role("button", name="I Accept").click(timeout=5000)
         except TimeoutError:
-            pass  # Banner nicht gefunden
+            pass
 
         # 2) Profil wählen
         page.get_by_role("button", name=profile).click()
@@ -19,7 +18,7 @@ def scrape_praemie(profile, datum, fahrzeug, leasing):
         # 3) Datum eingeben
         page.locator('[data-test="DateInputFormik"]').fill(datum)
 
-        # 4) Fahrzeug eingeben und Auswahl treffen
+        # 4) Fahrzeug eingeben + Suggest-Auswahl
         text_input = page.locator('[data-test="TextInputFormik"]').first
         text_input.fill(fahrzeug)
         page.get_by_role("listitem") \
@@ -27,10 +26,13 @@ def scrape_praemie(profile, datum, fahrzeug, leasing):
             .first \
             .click()
 
-        # 5) Leasing auswählen (falls gewünscht)
+        # 5) Leasing anklicken (falls gewünscht)
         if leasing:
             try:
-                page.get_by_text("Leasing").click()
+                leasing_locator = page.locator('[data-test="RadioCheckbox"]') \
+                                      .filter(has_text="Leasing") \
+                                      .first
+                leasing_locator.click(timeout=5000)
             except TimeoutError:
                 pass  # Checkbox nicht gefunden
 
