@@ -21,15 +21,25 @@ def scrape_praemie(profile, datum, fahrzeug, leasing):
             return None
 
         # 3) Datum eingeben
-        page.locator('[data-test="DateInputFormik"]').fill(datum)
+        try:
+            page.locator('[data-test="DateInputFormik"]').fill(datum, timeout=5000)
+        except TimeoutError:
+            print("⚠️ Datumseingabe nicht möglich")
+            browser.close()
+            return None
 
-        # 4) Fahrzeug eingeben + Suggest-Auswahl
-        text_input = page.locator('[data-test="TextInputFormik"]').first
-        text_input.fill(fahrzeug)
-        page.get_by_role("listitem") \
-            .filter(has_text=fahrzeug.split(' ')[0]) \
-            .first \
-            .click(timeout=5000)
+        # 4) Fahrzeug eingeben + Suggest-Auswahl (5 s Timeout)
+        try:
+            text_input = page.locator('[data-test="TextInputFormik"]').first
+            text_input.fill(fahrzeug, timeout=5000)
+            page.get_by_role("listitem") \
+                .filter(has_text=fahrzeug.split(' ')[0]) \
+                .first \
+                .click(timeout=5000)
+        except TimeoutError:
+            print(f"⚠️ Fahrzeug‑Suggest für '{fahrzeug}' nicht gefunden")
+            browser.close()
+            return None
 
         # 5) Leasing anklicken (falls gewünscht, 5 s Timeout)
         if leasing:
@@ -39,10 +49,15 @@ def scrape_praemie(profile, datum, fahrzeug, leasing):
                                       .first
                 leasing_locator.click(timeout=5000)
             except TimeoutError:
-                pass
+                print("⚠️ Leasing‑Checkbox nicht gefunden")
 
-        # 6) Prämie berechnen
-        page.get_by_role("button", name="Prämien berechnen", exact=True).click(timeout=5000)
+        # 6) Prämie berechnen (5 s Timeout)
+        try:
+            page.get_by_role("button", name="Prämien berechnen", exact=True).click(timeout=5000)
+        except TimeoutError:
+            print("⚠️ Prämien berechnen‑Button nicht gefunden")
+            browser.close()
+            return None
 
         # 7) Ergebnis auslesen (10 s Timeout)
         try:
@@ -50,7 +65,7 @@ def scrape_praemie(profile, datum, fahrzeug, leasing):
         except TimeoutError:
             price = None
 
-        # Logging
+        # Logging für Render-Logs
         if price:
             print(f"Found price: {price}")
         else:
