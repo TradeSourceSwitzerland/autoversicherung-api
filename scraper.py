@@ -2,7 +2,7 @@ from playwright.sync_api import sync_playwright, TimeoutError
 
 def scrape_praemie(profile, datum, fahrzeug, leasing):
     with sync_playwright() as p:
-        browser = p.chromium.launch()
+        browser = p.chromium.launch(headless=True)
         page = browser.new_page()
         page.goto("https://www.comparis.ch/autoversicherung/default#content-2")
 
