@@ -14,8 +14,8 @@ def scrape_praemie(profile, datum, fahrzeug, leasing):
         except:
             pass
 
-        # 2) Profil wählen (dynamisch!)
-        page.get_by_role("button", name=profile).click(timeout=5000)
+        # 2) Junglenker‑Profil wählen (5 s Timeout, exact match)
+        page.get_by_role("button", name="Junglenker unter 25 Jahren", exact=True).click(timeout=5000)
 
         # 3) Datum eingeben
         page.locator('[data-test="DateInputFormik"]').fill(datum)
