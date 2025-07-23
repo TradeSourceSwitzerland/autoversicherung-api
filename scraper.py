@@ -1,75 +1,54 @@
-from playwright.sync_api import sync_playwright, TimeoutError
+#!/usr/bin/env python3
+from playwright.sync_api import sync_playwright
 
-def scrape_praemie(profile, datum, fahrzeug, leasing):
+def scrape_praemie():
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
+        browser = p.chromium.launch(headless=False)
         page = browser.new_page()
+
+        # 1) Seite öffnen
         page.goto("https://www.comparis.ch/autoversicherung/default#content-2")
 
-        # 1) Cookie‑Banner wegklicken (5 s Timeout)
-        try:
-            page.get_by_role("button", name="I Accept").click(timeout=5000)
-        except TimeoutError:
-            pass
+        # 2) Cookie‑Banner akzeptieren
+        page.get_by_role("button", name="I Accept").click()
 
-        # 2) Profil wählen (5 s Timeout)
-        try:
-            page.get_by_role("button", name=profile).click(timeout=5000)
-        except TimeoutError:
-            print(f"⚠️ Profil‑Button '{profile}' nicht gefunden")
-            browser.close()
-            return None
+        # 3) Junglenker‑Profil wählen
+        page.get_by_role("button", name="Junglenker unter 25 Jahren").click()
 
-        # 3) Datum eingeben
-        try:
-            page.locator('[data-test="DateInputFormik"]').fill(datum, timeout=5000)
-        except TimeoutError:
-            print("⚠️ Datumseingabe nicht möglich")
-            browser.close()
-            return None
+        # 4) Inverkehrssetzung anklicken
+        page.get_by_role("group", name="Inverkehrssetzung*").locator("label").click()
 
-        # 4) Fahrzeug eingeben + Suggest-Auswahl (5 s Timeout)
-        try:
-            text_input = page.locator('[data-test="TextInputFormik"]').first
-            text_input.fill(fahrzeug, timeout=5000)
-            page.get_by_role("listitem") \
-                .filter(has_text=fahrzeug.split(' ')[0]) \
-                .first \
-                .click(timeout=5000)
-        except TimeoutError:
-            print(f"⚠️ Fahrzeug‑Suggest für '{fahrzeug}' nicht gefunden")
-            browser.close()
-            return None
+        # 5) Datum ausfüllen
+        page.locator('[data-test="DateInputFormik"]').fill("12.2021")
 
-        # 5) Leasing anklicken (falls gewünscht, 5 s Timeout)
-        if leasing:
-            try:
-                leasing_locator = page.locator('[data-test="RadioCheckbox"]') \
-                                      .filter(has_text="Leasing") \
-                                      .first
-                leasing_locator.click(timeout=5000)
-            except TimeoutError:
-                print("⚠️ Leasing‑Checkbox nicht gefunden")
+        # 6) Marke/Modell anklicken
+        page.get_by_role("group", name="Marke/Modell oder Typenschein*").locator("label").click()
 
-        # 6) Prämie berechnen (5 s Timeout)
-        try:
-            page.get_by_role("button", name="Prämien berechnen", exact=True).click(timeout=5000)
-        except TimeoutError:
-            print("⚠️ Prämien berechnen‑Button nicht gefunden")
-            browser.close()
-            return None
+        # 7) Fahrzeugsuche ausfüllen
+        page.locator('[data-test="TextInputFormik"]').fill("aston martin vantage v8")
 
-        # 7) Ergebnis auslesen (10 s Timeout)
-        try:
-            price = page.text_content("text=/CHF/", timeout=10000)
-        except TimeoutError:
-            price = None
+        # 8) Genaue Auswahl aus der Autosuggest‑Liste
+        page.get_by_role("listitem") \
+            .filter(has_text="ASTON MARTIN V8 Vantage 4.7 AMR Sportshift321KW / 437HP2 Türen • Cabriolet •") \
+            .get_by_role("mark") \
+            .first \
+            .click()
 
-        # Logging für Render-Logs
-        if price:
-            print(f"Found price: {price}")
-        else:
-            print("⚠️ Preis nicht gefunden")
+        # 9) Leasing anhaken
+        page.locator('[data-test="RadioCheckbox"]').get_by_text("Leasing").click()
+
+        # 10) Prämie berechnen
+        page.get_by_role("button", name="Prämien berechnen", exact=True).click()
+
+        # 11) Ergebnis anklicken (optional)
+        page.get_by_text("CHF 2'387.90").click()
+
+        # 12) Prämie auslesen
+        price = page.text_content("text=/^CHF/")
 
         browser.close()
-    return price
+        return price
+
+if __name__ == "__main__":
+    prämie = scrape_praemie()
+    print(f"→ Gefundene Prämie: {prämie}")
