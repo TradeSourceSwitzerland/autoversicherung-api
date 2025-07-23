@@ -1,5 +1,5 @@
-# Playwright‑Basis‑Image mit Browsern
-FROM mcr.microsoft.com/playwright:focal
+# Playwright‑Basis‑Image mit passenden Browsern für Version 1.48.0
+FROM mcr.microsoft.com/playwright:v1.48.0-focal
 
 WORKDIR /app
 
